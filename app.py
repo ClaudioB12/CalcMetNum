@@ -9,6 +9,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    func_str = None  # Inicializa func_str
     resultado = None
     error = None
     root = None
