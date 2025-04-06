@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Métodos Numéricos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0f5775;
+      color: #000;
+    }
+    .main {
+      display: flex;
+      padding: 20px;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    .left-panel, .right-panel {
+      background: #fff;
+      border: 1px solid #000;
+      border-radius: 5px;
+      padding: 20px;
+    }
+    .left-panel {
+      flex: 2;
+      margin-right: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    select, input, button {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .graph-area {
+      flex: 1;
+      width: 100%;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .table-area {
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      height: 100%;
+      overflow-y: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+    }
+  </style>
+  <script>
+    function toggleInputs() {
+      const method = document.querySelector('select[name="method"]').value;
+
+      document.querySelector('input[name="a"]').style.display = 'none';
+      document.querySelector('input[name="b"]').style.display = 'none';
+      document.querySelector('input[name="x0"]').style.display = 'none';
+      document.querySelector('input[name="x1"]').style.display = 'none';
+
+      if (method === 'bisection' || method === 'false_position' || method === 'brent') {
+        document.querySelector('input[name="a"]').style.display = 'block';
+        document.querySelector('input[name="b"]').style.display = 'block';
+      } else if (method === 'newton') {
+        document.querySelector('input[name="x0"]').style.display = 'block';
+      } else if (method === 'secant') {
+        document.querySelector('input[name="x0"]').style.display = 'block';
+        document.querySelector('input[name="x1"]').style.display = 'block';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelector('select[name="method"]').addEventListener('change', toggleInputs);
+      toggleInputs(); // inicializa visibilidad
+    });
+  </script>
+</head>
+<body>
+  <form method="POST" action="/">
+    <div class="main">
+      <div class="left-panel">
+        <select name="method" required>
+          <option value="">Elegir el método</option>
+          <option value="bisection">Bisección</option>
+          <option value="false_position">Falsa Posición</option>
+          <option value="newton">Newton-Raphson</option>
+          <option value="secant">Secante</option>
+          <option value="brent">Brent</option>
+        </select>
+        
+        {% if error %}
+        <p style="color: red;">Error: {{ error }}</p>
+        {% endif %}
+        
+        {% if resultado %}
+        <p style="color: green;">{{ resultado }}</p>
+        {% endif %}
+        
+        <div class="graph-area">
+          {% if func_str %}
+            <p><strong>Función: </strong>{{ func_str }}</p> <!-- Mostrar la función ingresada -->
+          {% endif %}
+          {% if image_path %}
+          <h3>Raíz: {{ root }}</h3>
+          <img src="{{ url_for('static', filename=image_path.split('/')[-1]) }}" alt="Gráfico">
+          {% else %}
+          <p>Generar la gráfica</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <input type="text" name="func" placeholder="Insertar función" required>
+
+        <input type="number" step="any" name="a" placeholder="Ingresar valor a" style="display: none;">
+        <input type="number" step="any" name="b" placeholder="Ingresar valor b" style="display: none;">
+        <input type="number" step="any" name="x0" placeholder="Ingresar x0" style="display: none;">
+        <input type="number" step="any" name="x1" placeholder="Ingresar x1" style="display: none;">
+
+        <input type="number" step="any" name="tol" placeholder="Ingresar Tolerancia" required>
+        <input type="number" name="max_iter" placeholder="Máx Iteraciones" required>
+
+        <button type="submit">Calcular</button>
+
+        <div class="table-area">
+          {% if table %}
+            <h4>Iteraciones:</h4>
+            {{ table | safe }}
+          {% else %}
+            <p>Ingresar una tabla con todas las iteraciones posibles y el valor de la raíz</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </form>
+</body>
+</html>
